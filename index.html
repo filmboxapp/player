@@ -13,28 +13,45 @@
       display: flex;
       justify-content: center;
       align-items: center;
+      overflow: hidden;
     }
     video {
       width: 100%;
       height: 100%;
-      background-color: #000;
-    }
-    .plyr__controls {
-      background: rgba(0,0,0,0.6);
-      backdrop-filter: blur(6px);
-    }
-    .plyr--video {
+      background: #000;
       border-radius: 12px;
       overflow: hidden;
+    }
+    .plyr__controls {
+      background: rgba(10, 10, 10, 0.75);
+      backdrop-filter: blur(8px);
+    }
+    .plyr--video {
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.05);
+    }
+    .logo {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 10;
+      opacity: 0.7;
+    }
+    .logo img {
+      width: 90px;
     }
   </style>
 </head>
 <body>
 
+  <div class="logo">
+    <img src="https://filmboxplay.lat/logo.png" alt="FILMBOX">
+  </div>
+
   <video id="player" playsinline controls></video>
 
   <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
   <script>
+    // Obtener link del video
     const params = new URLSearchParams(window.location.search);
     const url = params.get("url");
     const video = document.getElementById("player");
@@ -42,13 +59,29 @@
     if (url) {
       video.src = url;
     } else {
-      document.body.innerHTML = "<h2 style='color:white;'>No se ha proporcionado un link de video</h2>";
+      document.body.innerHTML = "<h2 style='color:white;text-align:center;'>No se ha proporcionado un link de video</h2>";
     }
 
+    // Inicializar el reproductor
     const player = new Plyr('#player', {
       controls: ['play', 'progress', 'current-time', 'mute', 'volume', 'settings', 'fullscreen'],
       settings: ['speed', 'loop'],
-      speed: { selected: 1, options: [0.75, 1, 1.25, 1.5, 2] }
+      speed: { selected: 1, options: [0.75, 1, 1.25, 1.5, 2] },
+      ratio: '16:9'
+    });
+
+    // Rotar automáticamente al entrar en pantalla completa
+    player.on('enterfullscreen', () => {
+      if (screen.orientation && screen.orientation.lock) {
+        screen.orientation.lock('landscape').catch(() => {});
+      }
+    });
+
+    // Volver a vertical al salir
+    player.on('exitfullscreen', () => {
+      if (screen.orientation && screen.orientation.lock) {
+        screen.orientation.lock('portrait').catch(() => {});
+      }
     });
   </script>
 
